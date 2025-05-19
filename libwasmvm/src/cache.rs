@@ -25,7 +25,7 @@ pub fn to_cache(ptr: *mut cache_t) -> Option<&'static mut Cache<GoApi, GoStorage
 }
 
 #[no_mangle]
-pub extern "C" fn init_cache(
+pub extern "C" fn init_cache_v152(
     data_dir: ByteSliceView,
     available_capabilities: ByteSliceView,
     cache_size: u32,            // in MiB
@@ -84,7 +84,7 @@ fn do_init_cache(
 }
 
 #[no_mangle]
-pub extern "C" fn save_wasm(
+pub extern "C" fn save_wasm_v152(
     cache: *mut cache_t,
     wasm: ByteSliceView,
     unchecked: bool,
@@ -117,7 +117,7 @@ fn do_save_wasm(
 }
 
 #[no_mangle]
-pub extern "C" fn remove_wasm(
+pub extern "C" fn remove_wasm_v152(
     cache: *mut cache_t,
     checksum: ByteSliceView,
     error_msg: Option<&mut UnmanagedVector>,
@@ -146,7 +146,7 @@ fn do_remove_wasm(
 }
 
 #[no_mangle]
-pub extern "C" fn load_wasm(
+pub extern "C" fn load_wasm_v152(
     cache: *mut cache_t,
     checksum: ByteSliceView,
     error_msg: Option<&mut UnmanagedVector>,
@@ -176,7 +176,7 @@ fn do_load_wasm(
 }
 
 #[no_mangle]
-pub extern "C" fn pin(
+pub extern "C" fn pin_v152(
     cache: *mut cache_t,
     checksum: ByteSliceView,
     error_msg: Option<&mut UnmanagedVector>,
@@ -206,7 +206,7 @@ fn do_pin(
 }
 
 #[no_mangle]
-pub extern "C" fn unpin(
+pub extern "C" fn unpin_v152(
     cache: *mut cache_t,
     checksum: ByteSliceView,
     error_msg: Option<&mut UnmanagedVector>,
@@ -271,7 +271,7 @@ fn set_to_csv(set: HashSet<String>) -> String {
 }
 
 #[no_mangle]
-pub extern "C" fn analyze_code(
+pub extern "C" fn analyze_code_v152(
     cache: *mut cache_t,
     checksum: ByteSliceView,
     error_msg: Option<&mut UnmanagedVector>,
@@ -350,7 +350,7 @@ impl From<cosmwasm_vm::Metrics> for Metrics {
 }
 
 #[no_mangle]
-pub extern "C" fn get_metrics(
+pub extern "C" fn get_metrics_v152(
     cache: *mut cache_t,
     error_msg: Option<&mut UnmanagedVector>,
 ) -> Metrics {
@@ -378,7 +378,7 @@ fn do_get_metrics(cache: &mut Cache<GoApi, GoStorage, GoQuerier>) -> Result<Metr
 /// This must be called exactly once for any `*cache_t` returned by `init_cache`
 /// and cannot be called on any other pointer.
 #[no_mangle]
-pub extern "C" fn release_cache(cache: *mut cache_t) {
+pub extern "C" fn release_cache_v152(cache: *mut cache_t) {
     if !cache.is_null() {
         // this will free cache when it goes out of scope
         let _ = unsafe { Box::from_raw(cache as *mut Cache<GoApi, GoStorage, GoQuerier>) };
@@ -402,7 +402,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -412,7 +412,7 @@ mod tests {
         assert!(error_msg.is_none());
         let _ = error_msg.consume();
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -421,7 +421,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr: *mut cache_t = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -443,7 +443,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -454,7 +454,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        save_wasm(
+        save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -463,7 +463,7 @@ mod tests {
         assert!(error_msg.is_none());
         let _ = error_msg.consume();
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -472,7 +472,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -483,7 +483,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum = save_wasm(
+        let checksum = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -495,7 +495,7 @@ mod tests {
 
         // Removing once works
         let mut error_msg = UnmanagedVector::default();
-        remove_wasm(
+        remove_wasm_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -505,7 +505,7 @@ mod tests {
 
         // Removing again fails
         let mut error_msg = UnmanagedVector::default();
-        remove_wasm(
+        remove_wasm_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -518,7 +518,7 @@ mod tests {
             "Error calling the VM: Cache error: Wasm file does not exist"
         );
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -527,7 +527,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -538,7 +538,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum = save_wasm(
+        let checksum = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -549,7 +549,7 @@ mod tests {
         let checksum = checksum.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
-        let wasm = load_wasm(
+        let wasm = load_wasm_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -559,7 +559,7 @@ mod tests {
         let wasm = wasm.consume().unwrap_or_default();
         assert_eq!(wasm, HACKATOM);
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -568,7 +568,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -579,7 +579,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum = save_wasm(
+        let checksum = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -590,7 +590,7 @@ mod tests {
         let checksum = checksum.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
-        pin(
+        pin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -600,7 +600,7 @@ mod tests {
 
         // pinning again has no effect
         let mut error_msg = UnmanagedVector::default();
-        pin(
+        pin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -608,7 +608,7 @@ mod tests {
         assert!(error_msg.is_none());
         let _ = error_msg.consume();
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -617,7 +617,7 @@ mod tests {
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -628,7 +628,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum = save_wasm(
+        let checksum = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -639,7 +639,7 @@ mod tests {
         let checksum = checksum.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
-        pin(
+        pin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -648,7 +648,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        unpin(
+        unpin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -658,7 +658,7 @@ mod tests {
 
         // Unpinning again has no effect
         let mut error_msg = UnmanagedVector::default();
-        unpin(
+        unpin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -666,7 +666,7 @@ mod tests {
         assert!(error_msg.is_none());
         let _ = error_msg.consume();
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -675,7 +675,7 @@ mod tests {
         let capabilities = b"staking,stargate,iterator";
 
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -686,7 +686,7 @@ mod tests {
         let _ = error_msg.consume();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum_hackatom = save_wasm(
+        let checksum_hackatom = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -697,7 +697,7 @@ mod tests {
         let checksum_hackatom = checksum_hackatom.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
-        let checksum_ibc_reflect = save_wasm(
+        let checksum_ibc_reflect = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(IBC_REFLECT),
             false,
@@ -708,7 +708,7 @@ mod tests {
         let checksum_ibc_reflect = checksum_ibc_reflect.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
-        let hackatom_report = analyze_code(
+        let hackatom_report = analyze_code_v152(
             cache_ptr,
             ByteSliceView::new(&checksum_hackatom),
             Some(&mut error_msg),
@@ -721,7 +721,7 @@ mod tests {
         );
 
         let mut error_msg = UnmanagedVector::default();
-        let ibc_reflect_report = analyze_code(
+        let ibc_reflect_report = analyze_code_v152(
             cache_ptr,
             ByteSliceView::new(&checksum_ibc_reflect),
             Some(&mut error_msg),
@@ -733,7 +733,7 @@ mod tests {
                 .to_string();
         assert_eq!(required_capabilities, "iterator,stargate");
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 
     #[test]
@@ -773,7 +773,7 @@ mod tests {
 
         // Init cache
         let mut error_msg = UnmanagedVector::default();
-        let cache_ptr = init_cache(
+        let cache_ptr = init_cache_v152(
             ByteSliceView::new(dir.as_bytes()),
             ByteSliceView::new(capabilities),
             512,
@@ -785,13 +785,13 @@ mod tests {
 
         // Get metrics 1
         let mut error_msg = UnmanagedVector::default();
-        let metrics = get_metrics(cache_ptr, Some(&mut error_msg));
+        let metrics = get_metrics_v152(cache_ptr, Some(&mut error_msg));
         let _ = error_msg.consume();
         assert_eq!(metrics, Metrics::default());
 
         // Save wasm
         let mut error_msg = UnmanagedVector::default();
-        let checksum_hackatom = save_wasm(
+        let checksum_hackatom = save_wasm_v152(
             cache_ptr,
             ByteSliceView::new(HACKATOM),
             false,
@@ -803,13 +803,13 @@ mod tests {
 
         // Get metrics 2
         let mut error_msg = UnmanagedVector::default();
-        let metrics = get_metrics(cache_ptr, Some(&mut error_msg));
+        let metrics = get_metrics_v152(cache_ptr, Some(&mut error_msg));
         let _ = error_msg.consume();
         assert_eq!(metrics, Metrics::default());
 
         // Pin
         let mut error_msg = UnmanagedVector::default();
-        pin(
+        pin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -819,7 +819,7 @@ mod tests {
 
         // Get metrics 3
         let mut error_msg = UnmanagedVector::default();
-        let metrics = get_metrics(cache_ptr, Some(&mut error_msg));
+        let metrics = get_metrics_v152(cache_ptr, Some(&mut error_msg));
         let _ = error_msg.consume();
         let Metrics {
             hits_pinned_memory_cache,
@@ -847,7 +847,7 @@ mod tests {
 
         // Unpin
         let mut error_msg = UnmanagedVector::default();
-        unpin(
+        unpin_v152(
             cache_ptr,
             ByteSliceView::new(&checksum),
             Some(&mut error_msg),
@@ -857,7 +857,7 @@ mod tests {
 
         // Get metrics 4
         let mut error_msg = UnmanagedVector::default();
-        let metrics = get_metrics(cache_ptr, Some(&mut error_msg));
+        let metrics = get_metrics_v152(cache_ptr, Some(&mut error_msg));
         let _ = error_msg.consume();
         assert_eq!(
             metrics,
@@ -873,6 +873,6 @@ mod tests {
             }
         );
 
-        release_cache(cache_ptr);
+        release_cache_v152(cache_ptr);
     }
 }

@@ -273,7 +273,7 @@ impl Default for UnmanagedVector {
 }
 
 #[no_mangle]
-pub extern "C" fn new_unmanaged_vector(
+pub extern "C" fn new_unmanaged_vector_v152(
     nil: bool,
     ptr: *const u8,
     length: usize,
@@ -292,7 +292,7 @@ pub extern "C" fn new_unmanaged_vector(
 }
 
 #[no_mangle]
-pub extern "C" fn destroy_unmanaged_vector(v: UnmanagedVector) {
+pub extern "C" fn destroy_unmanaged_vector_v152(v: UnmanagedVector) {
     let _ = v.consume();
 }
 
@@ -427,29 +427,29 @@ mod test {
     fn new_unmanaged_vector_works() {
         // Some simple data
         let data = b"some stuff";
-        let x = new_unmanaged_vector(false, data.as_ptr(), data.len());
+        let x = new_unmanaged_vector_v152(false, data.as_ptr(), data.len());
         assert_eq!(x.consume(), Some(Vec::<u8>::from(b"some stuff" as &[u8])));
 
         // empty created in Rust
         let data = b"";
-        let x = new_unmanaged_vector(false, data.as_ptr(), data.len());
+        let x = new_unmanaged_vector_v152(false, data.as_ptr(), data.len());
         assert_eq!(x.consume(), Some(Vec::<u8>::new()));
 
         // empty created in Go
-        let x = new_unmanaged_vector(false, std::ptr::null::<u8>(), 0);
+        let x = new_unmanaged_vector_v152(false, std::ptr::null::<u8>(), 0);
         assert_eq!(x.consume(), Some(Vec::<u8>::new()));
 
         // nil with garbage pointer
-        let x = new_unmanaged_vector(true, 345 as *const u8, 46);
+        let x = new_unmanaged_vector_v152(true, 345 as *const u8, 46);
         assert_eq!(x.consume(), None);
 
         // nil with empty slice
         let data = b"";
-        let x = new_unmanaged_vector(true, data.as_ptr(), data.len());
+        let x = new_unmanaged_vector_v152(true, data.as_ptr(), data.len());
         assert_eq!(x.consume(), None);
 
         // nil with null pointer
-        let x = new_unmanaged_vector(true, std::ptr::null::<u8>(), 0);
+        let x = new_unmanaged_vector_v152(true, std::ptr::null::<u8>(), 0);
         assert_eq!(x.consume(), None);
     }
 }
