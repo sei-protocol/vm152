@@ -1,5 +1,5 @@
 [package]
-name = "wasmvm"
+name = "wasmvm152"
 version = "1.5.2"
 publish = false
 authors = ["Ethan Frey <ethanfrey@users.noreply.github.com>"]

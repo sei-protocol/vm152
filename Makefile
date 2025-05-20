@@ -20,8 +20,8 @@ else
 		SHARED_LIB_DST = libwasmvm.$(shell rustc --print cfg | grep target_arch | cut  -d '"' -f 2).so
 	endif
 	ifeq ($(UNAME_S),Darwin)
-		SHARED_LIB_SRC = libwasmvm.dylib
-		SHARED_LIB_DST = libwasmvm.dylib
+		SHARED_LIB_SRC = libwasmvm152.dylib
+		SHARED_LIB_DST = libwasmvm152.dylib
 	endif
 endif
 
@@ -91,7 +91,7 @@ release-build-macos:
 	rm -rf libwasmvm/target/x86_64-apple-darwin/release
 	rm -rf libwasmvm/target/aarch64-apple-darwin/release
 	docker run --rm -u $(USER_ID):$(USER_GROUP) -v $(shell pwd)/libwasmvm:/code $(BUILDERS_PREFIX)-cross build_macos.sh
-	cp libwasmvm/artifacts/libwasmvm.dylib internal/api
+	cp libwasmvm/artifacts/libwasmvm152.dylib internal/api
 	make update-bindings
 
 # Creates a release build in a containerized build environment of the static library for macOS (.a)
