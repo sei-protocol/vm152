@@ -2,4 +2,4 @@
 // crate-type = ["staticlib"] via a command line arument.
 // See `--example wasmvmstatic`
 
-pub use wasmvm::*;
+pub use wasmvm155::*;

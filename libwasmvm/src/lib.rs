@@ -21,12 +21,12 @@ mod version;
 // exports. There are no guarantees those exports are stable.
 // We keep them here such that we can access them in the docs (`cargo doc`).
 pub use api::GoApi;
-pub use cache::{cache_t, load_wasm};
+pub use cache::{cache_t, load_wasm_v155};
 pub use db::{db_t, Db};
 pub use error::GoError;
 pub use gas_report::GasReport;
 pub use memory::{
-    destroy_unmanaged_vector, new_unmanaged_vector, ByteSliceView, U8SliceView, UnmanagedVector,
+    destroy_unmanaged_vector_v155, new_unmanaged_vector_v155, ByteSliceView, U8SliceView, UnmanagedVector,
 };
 pub use querier::GoQuerier;
 pub use storage::GoStorage;

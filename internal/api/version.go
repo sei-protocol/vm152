@@ -6,7 +6,7 @@ package api
 import "C"
 
 func LibwasmvmVersion() (string, error) {
-	version_ptr, err := C.version_str()
+	version_ptr, err := C.version_str_v155()
 	if err != nil {
 		return "", err
 	}
